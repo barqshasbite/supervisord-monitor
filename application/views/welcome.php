@@ -12,7 +12,7 @@
 	<noscript>
 	<?php
 	if($this->config->item('refresh')){ ?>
-	<meta http-equiv="refresh" content="<?php echo $this->config->item('refresh');?>">
+	<meta http-equiv="refresh" content="<?php echo $this->config->item('refresh');?>; URL=/?filter=<?php echo $filter; ?>">
 	<?php } ?>
 	</noscript>
 </head>
@@ -25,7 +25,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-		  <a class="brand" href="<?php echo site_url('');?>">Support Center</a>
+          <a class="brand" style="padding: 5px 20px 5px;" href="<?php echo site_url('');?>">
+              <?php if($this->config->item('logo_url') !== '') { ?>
+	          <img height="22" src="<?php echo $this->config->item('logo_url'); ?>">
+	      <?php } ?>
+	      <?php echo $this->config->item('site_name'); ?>
+	      <i class="icon-heart icon-red" style="vertical-align: initial;"></i>
+          </a>
           <div class="nav-collapse collapse">
             <ul class="nav">
 			<li class="active"><a href="<?php echo site_url();?>">Home</a></li>
@@ -43,33 +49,52 @@
         </div>
       </div>
     </div>
-	
+
 
 	<div class="container">
-	
+
 		<?php
 		if($muted){
 			echo '<div class="row"><div class="span4 offset4 label label-important" style="padding:10px;margin-bottom:20px;text-align:center;">';
 			echo 'Sound muted for '.timespan(time(),$muted).' <span class="pull-right"><a href="?mute=-1" style="color:white;"><i class="icon-music icon-white"></i> Unmute</a></span></div></div>';
 		}
-	
+
 		?>
+
+		<div class="btn-toolbar" role="toolbar" aria-label="">
+			<div class="btn-group" role="group" aria-label="">
+				<a class="btn <?php if($filter === '') { ?>btn-primary<?php } ?>" href="/">All</a>
+			</div>
+			<div class="btn-group" role="group" aria-label="">
+				<a class="btn <?php if($filter === 'alpha') { ?>btn-primary<?php } ?>" href="/?filter=alpha">Alpha</a>
+				<a class="btn <?php if($filter === 'beta') { ?>btn-primary<?php } ?>" href="/?filter=beta">Beta</a>
+				<a class="btn <?php if($filter === 'production') { ?>btn-primary<?php } ?>" href="/?filter=production">Production</a>
+			</div>
+			<div class="btn-group" role="group" aria-label="">
+				<div class="input-append" style="margin-bottom: 0;">
+					<form style="margin: 0;" action="/" method="GET">
+						<input class="span2" id="filterInput" type="text" name="filter" value="<?php echo $filter; ?>">
+						<button class="btn <?php if(!in_array(strtolower($filter), array('', 'alpha', 'beta', 'production'), true)) { ?>btn-primary<?php } ?>" type="submit">
+                                                        Custom Filter
+						</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
 		<div class="row">
 				<?php
 				$alert = false;
 				foreach($list as $name=>$procs){
 					$parsed_url = parse_url($cfg[$name]['url']);
-					if ( isset($cfg[$name]['username']) && isset($cfg[$name]['password']) ){
-						$base_url = 'http://' . $cfg[$name]['username'] . ':' . $cfg[$name]['password'] . '@';
-					}else{
-						$base_url = 'http://';
-					}
-					$ui_url = $base_url . $parsed_url['host'] . ':' . $cfg[$name]['port']. '/';
+					$parsed_public_url = parse_url($cfg[$name]['public_url']);
+					$base_url = 'http://';
+					$ui_url = $base_url . $parsed_public_url['host'] . ':' . $cfg[$name]['port']. '/';
 				?>
 				<div class="span<?php echo ($this->config->item('supervisor_cols')==2?'6':'4');?>">
 				<table class="table table-bordered table-condensed table-striped">
 					<tr><th colspan="4">
-						<a href="<?php echo $ui_url; ?>"><?php echo $name; ?></a> <?php if($this->config->item('show_host')){ ?><i><?php echo $parsed_url['host']; ?></i><?php } ?>
+						<a href="<?php echo $ui_url; ?>"><?php echo $name; ?></a>
 						<?php
 						if(isset($cfg[$name]['username'])){echo '<i class="icon-lock icon-green" style="color:blue" title="Authenticated server connection"></i>';}
 						if(!isset($procs['error'])){
@@ -83,22 +108,46 @@
 						}
 						?>
 					</th></tr>
+
+					<tr>
+						<th colspan="4">
+							<div class="row-fluid">
+								<div class="span3" style="min-height: initial;">
+									<i class="icon-globe icon-blue" style="color:blue" title="Environment"></i>
+									<i><?php echo $cfg[$name]['environment']; ?></i>
+								</div>
+								<div class="span3" style="min-height: initial;">
+									<i class="icon-cog icon-orange" style="color:orange" title="Component"></i>
+									<i><?php echo $cfg[$name]['component']; ?></i>
+								</div>
+								<div class="span3" style="min-height: initial;">
+									<i class="icon-eye-close icon-red" style="color:red" title="Private Address"></i>
+									<i><?php echo $parsed_url['host']; ?></i>
+								</div>
+								<div class="span3" style="min-height: initial;">
+									<i class="icon-eye-open icon-green" style="color:green" title="Public Address"></i>
+									<i><?php echo $parsed_public_url['host']; ?></i>
+								</div>
+							</div>
+						</th>
+					</tr>
+
 					<?php
 					$CI = &get_instance();
 					foreach($procs as $item){
 
-						if($item['group'] != $item['name']) $item_name = $item['group'].":".$item['name'];
-						else $item_name = $item['name'];
-						
-						$check = $CI->_request($name,'readProcessStderrLog',array($item_name,-1000,0));
-						if(is_array($check)) $check = print_r($check,1);
-						
 						if(!is_array($item)){
 								// Not having array means that we have error.
 								echo '<tr><td colspan="4">'.$item.'</td></tr>';
 								echo '<tr><td colspan="4">For Troubleshooting <a href="https://github.com/mlazarov/supervisord-monitor#troubleshooting" target="_blank">check this guide</a></td></tr>';
 								continue;
 						}
+
+						if($item['group'] != $item['name']) $item_name = $item['group'].":".$item['name'];
+						else $item_name = $item['name'];
+
+						$check = $CI->_request($name,'readProcessStderrLog',array($item_name,-1000,0));
+						if(is_array($check)) $check = print_r($check,1);
 
 						$pid = $uptime = '&nbsp;';
 						$status = $item['statename'];
@@ -148,7 +197,7 @@
 					}
 
 					?>
-				</table>				
+				</table>
 			</div>
 				<?php
 				}
@@ -160,13 +209,13 @@
 				}else{
 					echo '<title>Support center</title>';
 				}
-				
+
 				?>
 		</div>
 	</div>
 
     </div> <!-- /container -->
-	
+
 	<div class="footer">
 		<p>Powered by <a href="https://github.com/mlazarov/supervisord-monitor" target="_blank">Supervisord Monitor</a> | Page rendered in <strong>{elapsed_time}</strong> seconds</p>
 	</div>
@@ -210,9 +259,9 @@
 		$('#refresh').html('('+$refresh+')');
 		if($refresh<=0){
 			stopTimer();
-			location.href="<?php echo site_url() ?>";
+			location.href="<?php echo site_url() . '?filter=' . $filter ?>";
 		}
-		
+
 	}
 	function nl2br (str, is_xhtml) {
 		var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br ' + '/>' : '<br>';

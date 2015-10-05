@@ -1,42 +1,52 @@
 <?php
 
+// Name for header in site.
+$config['site_name'] = 'Service Health';
+
+// URL for a logo.
+$config['logo_url'] = '';
 
 // Dashboard columns. 2 or 3
 $config['supervisor_cols'] = 2;
 
 // Refresh Dashboard every x seconds. 0 to disable
-$config['refresh'] = 10;
+$config['refresh'] = 30;
 
 // Enable or disable Alarm Sound
-$config['enable_alarm'] = true;
+$config['enable_alarm'] = false;
 
-// Show hostname after server name
-$config['show_host'] = false;
+// Global credentials for all supervisor servers.
+$supervisor_username = '';
+$supervisor_password = '';
 
+// Populate supervisor_servers from EC2 instances.
+include(APPPATH.'config/ec2.php');
+$config['supervisor_servers'] = $supervisor_servers;
+
+/* Manual configuration
 $config['supervisor_servers'] = array(
-	'server01' => array(
-		'url' => 'http://server01.app/RPC2',
-		'port' => '9001',
-		'username' => 'yourusername',
-		'password' => 'yourpass'
-	),
-	'server02' => array(
-		'url' => 'http://server02.app/RPC2',
-                'port' => '9001'
-	),
-	'server03' => array(
-                'url' => 'http://server03.app/RPC2',
-                'port' => '9001'
-        ),
+    'server01' => array(
+        'url' => 'http://server01.app/RPC2',
+        'port' => '9100',
+        'username' => 'yourusername',
+        'password' => 'yourpass'
+    ),
+    'server02' => array(
+        'url' => 'http://server02.app/RPC2',
+        'port' => '9001'
+    ),
+    'server03' => array(
+        'url' => 'http://server03.app/RPC2',
+        'port' => '9001'
+    ),
 );
+*/
 
 // Set timeout connecting to remote supervisord RPC2 interface
-$config['timeout'] = 3;
+$config['timeout'] = 2;
 
 // Path to Redmine new issue url
-$config['redmine_url'] = 'http://redmine.url/path_to_new_issue_url';
+//$config['redmine_url'] = 'http://redmine.url/path_to_new_issue_url';
 
 // Default Redmine assigne ID
-$config['redmine_assigne_id'] = '69';
-
-
+//$config['redmine_assigne_id'] = '69';
