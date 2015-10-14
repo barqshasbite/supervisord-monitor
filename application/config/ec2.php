@@ -15,6 +15,9 @@ $reservations = $result['Reservations'];
 foreach($reservations as $reservation) {
     $instances = $reservation['Instances'];
     foreach($instances as $instance) {
+        if(!array_key_exists('Tags', $instance)) {
+            continue;
+        }
         $tags = $instance['Tags'];
         foreach($tags as $tag) {
             if ($tag['Key'] == 'Name') {
