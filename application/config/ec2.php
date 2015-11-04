@@ -9,7 +9,7 @@ $ec2s = array();
 
 $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
 
-// Filter EC2 instances by their names.
+// Filter EC2 instances by their Tags.
 $result = $client->describeInstances(array());
 $reservations = $result['Reservations'];
 foreach($reservations as $reservation) {
@@ -20,11 +20,9 @@ foreach($reservations as $reservation) {
         }
         $tags = $instance['Tags'];
         foreach($tags as $tag) {
-            if ($tag['Key'] == 'Name') {
-                if ($filter === '' || stripos($tag['Value'], $filter) !== false) {
-                    $ec2s[$instance['InstanceId']] = $instance;
-                    break;
-                }
+            if ($filter === '' || stripos($tag['Value'], $filter) !== false) {
+                $ec2s[$instance['InstanceId']] = $instance;
+                break;
             }
         }
     }
@@ -78,6 +76,9 @@ foreach($ec2s as $ec2) {
     }
     if($name == '') {
         $name = $ec2['InstanceId'];
+    } else {
+        $name = $name . ' (' . $ec2['InstanceId'] . ')';
     }
     $supervisor_servers[$name] = $server;
 }
+ksort($supervisor_servers);
