@@ -1,3 +1,8 @@
+AuthUserFile /home/ubuntu/.htpasswd
+AuthName "Login required."
+AuthType Basic
+Require valid-user
+
 RewriteEngine On
 RewriteBase /
 
