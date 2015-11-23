@@ -63,7 +63,7 @@ foreach($ec2s as $ec2) {
     if(array_key_exists('StateReason', $ec2)) {
         $server['state_reason'] = $ec2['StateReason']['Message'];
     }
-    $name = '';
+    $name = $ec2['InstanceId'];
     $tags = $ec2['Tags'];
     foreach($tags as $tag) {
         if ($tag['Key'] == 'Environment') {
@@ -71,13 +71,8 @@ foreach($ec2s as $ec2) {
         } else if($tag['Key'] == 'Component') {
             $server['component'] = $tag['Value'];
         } else if($tag['Key'] == 'Name') {
-            $name = $tag['Value'];
+            $server['name'] = $tag['Value'];
         }
-    }
-    if($name == '') {
-        $name = $ec2['InstanceId'];
-    } else {
-        $name = $name . ' (' . $ec2['InstanceId'] . ')';
     }
     $supervisor_servers[$name] = $server;
 }

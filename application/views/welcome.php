@@ -85,7 +85,7 @@
 		<div class="row">
 				<?php
 				$alert = false;
-				foreach($list as $name=>$procs){
+				foreach($list as $name=>$payload){
 					$parsed_url = parse_url($cfg[$name]['url']);
 					$parsed_public_url = parse_url($cfg[$name]['public_url']);
 					$base_url = 'http://';
@@ -94,10 +94,10 @@
 				<div class="span<?php echo ($this->config->item('supervisor_cols')==2?'6':'4');?>">
 				<table class="table table-bordered table-condensed table-striped">
 					<tr><th colspan="4">
-						<a href="<?php echo $ui_url; ?>"><?php echo $name; ?></a>
+						<a href="<?php echo $ui_url; ?>"><?php echo $payload['server']['name']; ?> (<?php echo $name; ?>)</a>
 						<?php
 						if(isset($cfg[$name]['username'])){echo '<i class="icon-lock icon-green" style="color:blue" title="Authenticated server connection"></i>';}
-						if(!isset($procs['error'])){
+						if(!isset($payload['processes']['error'])){
 						?>
 						<span class="server-btns pull-right">
 							<a href="<?php echo site_url('/control/stopall/'.$name); ?>" class="btn btn-mini btn-inverse" type="button"><i class="icon-stop icon-white"></i> Stop all</a>
@@ -134,7 +134,7 @@
 
 					<?php
 					$CI = &get_instance();
-					foreach($procs as $item){
+					foreach($payload['processes'] as $item){
 
 						if(!is_array($item)){
 								// Not having array means that we have error.

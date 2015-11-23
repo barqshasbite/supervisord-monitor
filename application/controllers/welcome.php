@@ -27,7 +27,10 @@ class Welcome extends MY_Controller {
             $data['list'] = array();
         } else {
             foreach($servers as $name=>$config){
-                $data['list'][$name] = $this->_request($name,'getAllProcessInfo');
+                $data['list'][$name] = array(
+                    'server' => $config,
+                    'processes' => $this->_request($name,'getAllProcessInfo'),
+                );
             }
         }
         $data['cfg'] = $servers;
